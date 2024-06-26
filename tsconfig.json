@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true, 
+    "skipLibCheck": true 
+  },
+  "include": [
+    "user/adapters/**/*.ts",
+    
+    "user/application/**/*.ts",
+    "user/domain/**/*.ts",
+    "user/infrastructure/**/*.ts"
+  ]
+}
