@@ -1,9 +1,9 @@
 export interface UserData {
-    id: number;
+    id: string;
     name: string;
     email: string;
 }
 
 export class User implements UserData {
-    constructor(public id: number, public name: string, public email: string) {}
+    constructor(public id: string, public name: string, public email: string) {}
 }

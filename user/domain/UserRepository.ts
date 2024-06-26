@@ -1,8 +1,11 @@
-import { User } from "../domain/User";
+import { User } from "./User";
 
 export interface UserRepository {
     getUsers(): Promise<User[]>;
-    addUser(user: Omit<User, 'id'>): Promise<User>;
-    updateUser(id: number, user: Partial<User>): Promise<void>;
-    deleteUser(id: number): Promise<void>;
+    getUserById(id: string): Promise<User | null>;
+    addUser(user: Omit<User, "id">): Promise<User>;
+    updateUser(id: string, user: Partial<User>): Promise<void>;
+    deleteUser(id: string): Promise<void>;
 }
+
+

@@ -1,57 +1,35 @@
-import { Connection, OkPacket, RowDataPacket } from 'mysql2/promise';
-import { UserRepository } from '../../domain/UserRepository';
+import { Connection } from 'mysql2/promise';
 import { User } from '../../domain/User';
+import { UserRepository } from '../../domain/UserRepository';
 
 export class MySQLAdapter implements UserRepository {
-    private connection: Connection;
+    constructor(private readonly connection: Connection) {}
 
-    constructor(connection: Connection) {
-        this.connection = connection;
-    }
-
-    // GET: Obtener todos los usuarios
     async getUsers(): Promise<User[]> {
-        const [rows] = await this.connection.execute<RowDataPacket[]>('SELECT * FROM users');
-        return rows.map(row => new User(row.id, row.name, row.email));
+        const [rows] = await this.connection.query('SELECT * FROM users');
+        return (rows as any[]).map(row => new User(row.id.toString(), row.name, row.email));
     }
 
-    // POST: Agregar un nuevo usuario
-    async addUser(user: User): Promise<User> {
-        const [result] = await this.connection.execute<OkPacket>(
-            'INSERT INTO users (name, email) VALUES (?, ?)', 
-            [user.name, user.email]
-        );
-
-        const insertedId = result.insertId;
-        return new User(insertedId, user.name, user.email);
+    async getUserById(id: string): Promise<User | null> {
+        const [rows] = await this.connection.query('SELECT * FROM users WHERE id = ?', [id]);
+        if ((rows as any[]).length === 0) {
+            return null;
+        }
+        const row = (rows as any[])[0];
+        return new User(row.id.toString(), row.name, row.email);
     }
 
-    // UPDATE: Actualizar un usuario existente por su ID
-    async updateUser(id: number, user: Partial<User>): Promise<void> {
-        // Construir la consulta SQL dinámicamente
-        const fields: string[] = [];
-        const values: (string | number)[] = [];
-
-        if (user.name !== undefined) {
-            fields.push('name = ?');
-            values.push(user.name);
-        }
-
-        if (user.email !== undefined) {
-            fields.push('email = ?');
-            values.push(user.email);
-        }
-
-        if (fields.length > 0) {
-            const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-            values.push(id);
-
-            await this.connection.execute(sql, values);
-        }
+    async addUser(user: Omit<User, "id">): Promise<User> {
+        const [result] = await this.connection.execute('INSERT INTO users (name, email) VALUES (?, ?)', [user.name, user.email]);
+        const insertId = (result as any).insertId;
+        return new User(insertId.toString(), user.name, user.email);
     }
 
-    // DELETE: Eliminar un usuario por su ID
-    async deleteUser(id: number): Promise<void> {
+    async updateUser(id: string, user: Partial<User>): Promise<void> {
+        await this.connection.execute('UPDATE users SET name = ?, email = ? WHERE id = ?', [user.name, user.email, id]);
+    }
+
+    async deleteUser(id: string): Promise<void> {
         await this.connection.execute('DELETE FROM users WHERE id = ?', [id]);
     }
 }
