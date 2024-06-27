@@ -14,10 +14,11 @@ app.use(express.json());
 
 const startMySQLConnection = async (): Promise<MySQLAdapter> => {
     const mysqlConnection: Connection = await createConnection({
-        host: 'database-1.ch3invxacnfz.us-east-1.rds.amazonaws.com',
+        host: 'databaseapi.c4vamuawvh4u.us-east-1.rds.amazonaws.com',
         user: 'admin',
-        password: 'pichito34',
-        database: 'BD1'
+        password: 'pichon69',
+        database: 'db1',
+        connectTimeout: 10000  // 10 segundos
     });
     return new MySQLAdapter(mysqlConnection);
 };
